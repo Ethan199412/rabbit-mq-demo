@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { RabbitMQService } from './rabbit.service';
 import { RabbitMqController } from './rabbit.controller';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   controllers: [RabbitMqController],
