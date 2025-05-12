@@ -1,14 +1,42 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as amqp from 'amqplib';
 import { Cron, CronExpression } from '@nestjs/schedule';
 
+export function InjectChannel(configName: string) {
+  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
+    const originalMethod = descriptor.value;
+
+    descriptor.value = async function (...args: any[]) {
+      // 动态获取参数（this 指向当前实例）
+      // const { connection, amqTopicConfig } = optionsFactory(this);
+      const config = this[configName];
+      const { connection } = this;
+      const { exchange, exchangeType, durable } = config;
+      const channel = await connection.createChannel();
+
+      await channel.assertExchange(exchange, exchangeType, {
+        durable,
+      });
+      config.channel = channel; // 注入到实例属性
+
+      const res = await originalMethod.apply(this, args);
+      await channel.close();
+      return res;
+    };
+  };
+}
+
 @Injectable()
-export class RabbitMQService {
+export class RabbitMQService implements OnModuleInit {
   private readonly logger = new Logger(RabbitMQService.name);
   private connection: amqp.Connection;
   private channel: amqp.Channel;
 
   private chinaChannel: amqp.Channel;
+
+  async onModuleInit() {
+    await this.connect();
+  }
 
   // RabbitMQ 配置 [4]()
   private readonly config = {
@@ -27,6 +55,14 @@ export class RabbitMQService {
     exchange: 'china-direct',
     exchangeType: 'direct',
     durable: true,
+  };
+
+  private readonly chinaTopicConfig = {
+    ...this.basicConfig,
+    exchange: 'china-topic',
+    exchangeType: 'topic',
+    durable: true,
+    channel: null,
   };
 
   // 初始化连接
@@ -101,6 +137,19 @@ export class RabbitMQService {
       this.logger.error(` 消息发送失败: ${error.message}`);
       throw error;
     }
+  }
+
+  @InjectChannel('chinaTopicConfig')
+  async publishChinaTopicMessage(routingKey: string, message: object) {
+    console.log('[p1.10]', routingKey);
+    const channel = this.chinaTopicConfig.channel as amqp.Channel;
+    console.log('[p1.1]', routingKey);
+    await channel.publish(
+      'china-topic',
+      routingKey,
+      Buffer.from(JSON.stringify(message)),
+      { persistent: true }, // 消息持久化
+    );
   }
 
   // 关闭连接

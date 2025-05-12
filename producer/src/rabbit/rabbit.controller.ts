@@ -32,4 +32,18 @@ export class RabbitMqController {
     await this.rabbitService.publishChinaMessage(routing_key, payload);
     return { status: 'Message sent' };
   }
+
+  @Get('produce_china_topic')
+  async sendChinaTopicMessage(@Query() query: ChinaMqMessageDto) {
+    const { routing_key } = query;
+    console.log('[p1.0] get request');
+    // const routingKey = 'china-sports';
+    const payload = {
+      timestamp: new Date(),
+      message: 'china-haha1',
+    };
+
+    await this.rabbitService.publishChinaTopicMessage(routing_key, payload);
+    return { status: 'Message sent' };
+  }
 }
