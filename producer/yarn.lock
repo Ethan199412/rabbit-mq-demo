@@ -1777,7 +1777,7 @@ cjs-module-lexer@^1.0.0:
 
 class-validator@^0.14.2:
   version "0.14.2"
-  resolved "https://registry.npmjs.org/class-validator/-/class-validator-0.14.2.tgz#a3de95edd26b703e89c151a2023d3c115030340d"
+  resolved "http://artifactory.intra.xiaojukeji.com/artifactory/api/npm/npm/class-validator/-/class-validator-0.14.2.tgz?dl=https%3A%2F%2Fregistry.npmmirror.com%2Fclass-validator%2F-%2Fclass-validator-0.14.2.tgz#a3de95edd26b703e89c151a2023d3c115030340d"
   integrity sha512-3kMVRF2io8N8pY1IFIXlho9r8IPUUIfHe2hYVtiebvAzU2XeQFXTv+XI4WX+TnXmtwXMDcjngcpkiPM0O9PvLw==
   dependencies:
     "@types/validator" "^13.11.8"
