@@ -21,6 +21,7 @@ export function InjectChannel(configName: string) {
 
       const res = await originalMethod.apply(this, args);
       await channel.close();
+      config.channel = null; // 清除 channel 引用
       return res;
     };
   };
@@ -68,7 +69,26 @@ export class RabbitMQService implements OnModuleInit {
   // 初始化连接
   async connect() {
     try {
-      this.connection = await amqp.connect(this.basicConfig.url);
+      this.connection = await amqp.connect(
+        'amqp://admin:admin123@81.70.46.244:5672',
+        {
+          // 添加重试机制
+          reconnect: true,
+          reconnectBackoffTime: 5000, // 5秒重试间隔
+        },
+      );
+      // this.connection = await amqp.connect({
+      //   protocol: 'amqp',
+      //   // url: this.basicConfig.url,
+      //   host: '81.70.46.244',
+      //   port: 5672,
+      //   username: 'admin',
+      //   password: 'admin123',
+      //   // retry: {
+      //   //   maxAttempts: 3,
+      //   //   interval: 1000,
+      //   // },
+      // });
       this.logger.log(' 成功连接到 RabbitMQ');
     } catch (error) {
       this.logger.error(` 连接失败: ${error.message}`);
@@ -112,6 +132,18 @@ export class RabbitMQService implements OnModuleInit {
     }
   }
 
+  @InjectChannel('amqTopicConfig')
+  async publishMessage(routingKey: string, message: object) {
+    const channel = this.amqTopicConfig.channel as amqp.Channel;
+
+    await channel.publish(
+      'amq.topic',
+      routingKey,
+      Buffer.from(JSON.stringify(message)),
+      { persistent: true }, // 消息持久化
+    );
+  }
+
   @InjectChannel('chinaTopicConfig')
   async publishChinaTopicMessage(routingKey: string, message: object) {
     console.log('[p1.10]', routingKey);
@@ -122,6 +154,15 @@ export class RabbitMQService implements OnModuleInit {
       routingKey,
       Buffer.from(JSON.stringify(message)),
       { persistent: true }, // 消息持久化
+      (err, ok) => {
+        if (err) {
+          console.log('消息发送失败');
+          return;
+        }
+        console.log('消息已确认');
+      },
     );
+
+    // channel.on('return', (msg) => {});
   }
 }
