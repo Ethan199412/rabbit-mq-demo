@@ -13,6 +13,7 @@ export function InjectChannel(configName: string) {
       const { connection } = this;
       const { exchange, exchangeType, durable } = config;
       const channel = await connection.createChannel();
+      // connection.createConfirmChannel();
 
       await channel.assertExchange(exchange, exchangeType, {
         durable,
@@ -61,6 +62,12 @@ export class RabbitMQService implements OnModuleInit {
     durable: true,
     channel: null,
   };
+
+  private pendingConfirms: {
+    correlationId: string;
+    resolve: (...res: any) => void;
+    reject: (err: Error) => void;
+  }[] = [];
 
   async onModuleInit() {
     await this.connect();
@@ -164,5 +171,54 @@ export class RabbitMQService implements OnModuleInit {
     );
 
     // channel.on('return', (msg) => {});
+  }
+
+  async publishConfirmMessage(routingKey: string, message: object) {
+    const channel = await this.connection.createConfirmChannel();
+    const exchange = 'china-topic';
+    // console.log('[p1.30]', { channel });
+    await channel.assertExchange(exchange, 'topic', { durable: true });
+
+    const correlationId = Date.now().toString();
+
+    const payload = Buffer.from(JSON.stringify(message));
+
+    return new Promise((resolve, reject) => {
+      // 将当前的 Promise 放入队列，等待 ack/nack 顺序处理
+      this.pendingConfirms.push({ correlationId, resolve, reject });
+
+      const success = channel.publish(
+        exchange,
+        routingKey,
+        payload,
+        { correlationId }, // correlationId 设置在消息属性中
+      );
+
+      // 非常关键！监听 channel 上的 'drain' 或执行 flush
+      // 但我们不能在这里直接知道 ack/nack，我们要监听全局确认事件
+
+      // 手动调用 channel.once() 是不可行的：amqplib 是顺序 ack，所以你必须按顺序处理
+
+      // 让 amqplib 处理回调：
+      channel.once('ack', () => {
+        const confirm = this.pendingConfirms.shift();
+        if (confirm) {
+          console.log(`✅ ACK for ${confirm.correlationId}`);
+          confirm.resolve(confirm.correlationId);
+        }
+      });
+
+      channel.once('nack', () => {
+        const confirm = this.pendingConfirms.shift();
+        if (confirm) {
+          console.log(`❌ NACK for ${confirm.correlationId}`);
+          confirm.reject(new Error('Message NACKed by broker'));
+        }
+      });
+
+      if (!success) {
+        reject(new Error('Publish returned false (backpressure)'));
+      }
+    }).then((correlationId) => correlationId);
   }
 }

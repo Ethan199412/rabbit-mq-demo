@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
 import { RabbitNewService } from './rabbit-new.service';
-import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import {
+  RabbitMQChannelConfig,
+  RabbitMQModule,
+} from '@golevelup/nestjs-rabbitmq';
 import { RabbitNewController } from './rabbit-new.controller';
 
+// const a: RabbitMQChannelConfig;
 @Module({
   providers: [RabbitNewService],
   controllers: [RabbitNewController],
@@ -15,12 +19,11 @@ import { RabbitNewController } from './rabbit-new.controller';
         },
       ],
       uri: 'amqp://admin:admin123@81.70.46.244:5672',
-      channels: {
-        channel: {
-          prefetchCount: 5,
-          default: true,
-        },
-      },
+      // channels: {
+      //   'confirm-channel': {
+      //     confirm: true,
+      //   },
+      // },
       // channels: {
       //   'china-topic': {
       //     default: true,
@@ -28,6 +31,7 @@ import { RabbitNewController } from './rabbit-new.controller';
       //   },
       // },
       connectionInitOptions: { wait: false },
+      connectionManagerOptions: {},
     }),
   ],
   exports: [RabbitMQModule],
