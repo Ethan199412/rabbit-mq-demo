@@ -15,7 +15,7 @@ export class RabbitMqController {
       message: 'haha',
     };
 
-    await this.rabbitService.publishMessage(routingKey, payload);
+    await this.rabbitService.publishMessage(1000000, payload);
     return { status: 'Message sent' };
   }
 
@@ -30,6 +30,22 @@ export class RabbitMqController {
     };
 
     await this.rabbitService.publishChinaMessage(routing_key, payload);
+    return { status: 'Message sent' };
+  }
+
+  @Get('produce_china_temp')
+  async sendChinaTempMessage(@Query() query: ChinaMqMessageDto) {
+    // for (let i = 0; i < 100000; i++) {
+    const { routing_key } = query;
+    console.log('[p1.0] get request');
+    // const routingKey = 'china-sports';
+    const payload = {
+      timestamp: new Date(),
+      message: 'chian-haha',
+    };
+
+    await this.rabbitService.publishTempMessage(routing_key, payload);
+    // }
     return { status: 'Message sent' };
   }
 

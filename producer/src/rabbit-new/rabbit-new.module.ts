@@ -19,6 +19,14 @@ import { RabbitNewController } from './rabbit-new.controller';
         },
       ],
       uri: 'amqp://admin:admin123@81.70.46.244:5672',
+      // queues: [
+      //   {
+      //     name: 'china.temp',
+      //     exchange: 'china-topic',
+      //     routingKey: 'china.#',
+      //     options: { durable: false },
+      //   },
+      // ],
       // channels: {
       //   'confirm-channel': {
       //     confirm: true,

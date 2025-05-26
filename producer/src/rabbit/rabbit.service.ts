@@ -63,6 +63,14 @@ export class RabbitMQService implements OnModuleInit {
     channel: null,
   };
 
+  private readonly chinaTempConfig = {
+    ...this.basicConfig,
+    exchange: 'china-temp-ex',
+    exchangeType: 'topic',
+    durable: false,
+    channel: null,
+  };
+
   private pendingConfirms: {
     correlationId: string;
     resolve: (...res: any) => void;
@@ -139,16 +147,32 @@ export class RabbitMQService implements OnModuleInit {
     }
   }
 
+  @InjectChannel('chinaTempConfig')
+  async publishTempMessage(routingKey: string, message: object) {
+    const channel = this.chinaTempConfig.channel as amqp.Channel;
+
+    for (let i = 0; i < 100000; i++) {
+      channel.publish(
+        this.chinaTopicConfig.exchange,
+        routingKey,
+        Buffer.from(JSON.stringify(message)),
+        { persistent: false }, // 消息持久化
+      );
+    }
+  }
+
   @InjectChannel('amqTopicConfig')
-  async publishMessage(routingKey: string, message: object) {
+  async publishMessage(num: number, message: object) {
     const channel = this.amqTopicConfig.channel as amqp.Channel;
 
-    await channel.publish(
-      'amq.topic',
-      routingKey,
-      Buffer.from(JSON.stringify(message)),
-      { persistent: true }, // 消息持久化
-    );
+    for (let i = 0; i < num; i++) {
+      await channel.sendToQueue(
+        'china.sports',
+        Buffer.from(JSON.stringify(message)),
+        { deliveryMode: 1 }, // 消息持久化
+      );
+      console.log('sent');
+    }
   }
 
   @InjectChannel('chinaTopicConfig')
