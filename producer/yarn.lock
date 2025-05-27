@@ -816,6 +816,11 @@
   dependencies:
     "@noble/hashes" "^1.1.5"
 
+"@prisma/client@^6.8.2":
+  version "6.8.2"
+  resolved "http://artifactory.intra.xiaojukeji.com/artifactory/api/npm/npm/@prisma/client/-/client-6.8.2.tgz?dl=https%3A%2F%2Fregistry.npmmirror.com%2F%40prisma%2Fclient%2F-%2Fclient-6.8.2.tgz#f0af46643604cd38341f285483edc3c3ae7e6651"
+  integrity sha512-5II+vbyzv4si6Yunwgkj0qT/iY0zyspttoDrL3R4BYgLdp42/d2C8xdi9vqkrYtKt9H32oFIukvyw3Koz5JoDg==
+
 "@prisma/config@6.8.2":
   version "6.8.2"
   resolved "http://artifactory.intra.xiaojukeji.com/artifactory/api/npm/npm/@prisma/config/-/config-6.8.2.tgz?dl=https%3A%2F%2Fregistry.npmmirror.com%2F%40prisma%2Fconfig%2F-%2Fconfig-6.8.2.tgz#30459b86f67acbd65e1e6f491215f6da9e0a2e99"

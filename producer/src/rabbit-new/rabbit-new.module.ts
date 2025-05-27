@@ -18,6 +18,6 @@ import { RabbitNewConsumerService } from './rabbit-new-consumer.service';
       connectionManagerOptions: {},
     }),
   ],
-  exports: [RabbitMQModule],
+  exports: [RabbitNewService],
 })
 export class RabbitNewModule {}

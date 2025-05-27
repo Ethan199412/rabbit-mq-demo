@@ -5,7 +5,7 @@ import { OrderService } from './order.service';
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
   @Post('create-order')
-  async createOrder(@Body() body: { userId: string; productName: string }) {
+  async createOrder(@Body() body: { user_id: string; product_name: string }) {
     await this.orderService.createOrder(body);
   }
 }
