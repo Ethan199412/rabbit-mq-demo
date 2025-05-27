@@ -1,7 +1,7 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { RabbitNewService } from './rabbit-new.service';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-import { PublishReqDto } from './rabbit-new.dto';
+import { PublishReqDto, PublishDelayReqDto } from './rabbit-new.dto';
 
 @Controller('rabbit-new')
 export class RabbitNewController {
@@ -12,8 +12,12 @@ export class RabbitNewController {
 
   @Post('publish')
   async publish(@Body() body: PublishReqDto) {
-    // throw new Error('123');
     return this.rabbitNewService.publish(body);
+  }
+
+  @Post('publish-delay')
+  async publishDelay(@Body() body: PublishDelayReqDto) {
+    return this.rabbitNewService.publishDelay(body);
   }
 
   @Post('china-topic')

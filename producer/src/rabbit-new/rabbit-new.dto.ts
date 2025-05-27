@@ -37,3 +37,9 @@ export class PublishReqDto {
   @IsNotEmpty()
   message: MsgDto;
 }
+
+export class PublishDelayReqDto extends PublishReqDto {
+  @IsNumber()
+  @IsNotEmpty()
+  delay: number;
+}

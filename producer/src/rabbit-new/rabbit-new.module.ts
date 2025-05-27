@@ -5,39 +5,15 @@ import {
   RabbitMQModule,
 } from '@golevelup/nestjs-rabbitmq';
 import { RabbitNewController } from './rabbit-new.controller';
+import { RabbitNewConsumerService } from './rabbit-new-consumer.service';
 
 // const a: RabbitMQChannelConfig;
 @Module({
-  providers: [RabbitNewService],
+  providers: [RabbitNewService, RabbitNewConsumerService],
   controllers: [RabbitNewController],
   imports: [
     RabbitMQModule.forRoot({
-      exchanges: [
-        {
-          name: 'china-topic',
-          type: 'topic',
-        },
-      ],
       uri: 'amqp://admin:admin123@81.70.46.244:5672',
-      // queues: [
-      //   {
-      //     name: 'china.temp',
-      //     exchange: 'china-topic',
-      //     routingKey: 'china.#',
-      //     options: { durable: false },
-      //   },
-      // ],
-      // channels: {
-      //   'confirm-channel': {
-      //     confirm: true,
-      //   },
-      // },
-      // channels: {
-      //   'china-topic': {
-      //     default: true,
-      //     confirm: true
-      //   },
-      // },
       connectionInitOptions: { wait: false },
       connectionManagerOptions: {},
     }),

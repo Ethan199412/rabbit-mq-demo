@@ -5,7 +5,7 @@ import {
   RabbitRPC,
   RabbitSubscribe,
 } from '@golevelup/nestjs-rabbitmq';
-import { PublishReqDto } from './rabbit-new.dto';
+import { PublishReqDto, PublishDelayReqDto } from './rabbit-new.dto';
 
 @Injectable()
 export class RabbitNewService {
@@ -43,6 +43,26 @@ export class RabbitNewService {
         routing_key, // 完整routing key[4]()
         withIdMessage,
         {},
+      );
+    }
+    return { success: true };
+  }
+
+  async publishDelay(body: PublishDelayReqDto) {
+    let { num } = body;
+    const { message, routing_key, exchange, delay } = body;
+
+    // 在这里通过 confirm 指定生产者确认
+    num = num || 1;
+    for (let i = 0; i < num; i++) {
+      const withIdMessage = { ...message, id: String(Math.random()).slice(2) };
+      this.amqpConnection.publish(
+        exchange,
+        routing_key, // 完整routing key[4]()
+        withIdMessage,
+        {
+          headers: { 'x-delay': delay }, // 可选延时设置
+        },
       );
     }
     return { success: true };
